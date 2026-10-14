@@ -7,96 +7,160 @@
     <title>π — Gerador de Dígitos</title>
 
     <style>
+        :root {
+            --fundo: #0b1020;
+            --painel: #151c2e;
+            --painel-interno: #080d19;
+            --cartao: #202a40;
+            --borda: #2b354d;
+            --texto: #e5e7eb;
+            --secundario: #9ca3af;
+            --azul: #60a5fa;
+            --verde: #16a34a;
+            --vermelho: #dc2626;
+            --cinza: #475569;
+        }
+
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
+            width: 100%;
+            height: 100%;
             margin: 0;
-            min-height: 100vh;
-            padding: 24px;
-            background: #0b1020;
-            color: #e5e7eb;
+        }
+
+        body {
+            background: var(--fundo);
+            color: var(--texto);
             font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .pagina {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 26px 24px 140px;
         }
 
         .container {
             width: 100%;
             max-width: 1000px;
-            margin: 40px auto;
+            margin: 0 auto;
             padding: 28px;
-            background: #151c2e;
-            border: 1px solid #2b354d;
+            background: var(--painel);
+            border: 1px solid var(--borda);
             border-radius: 18px;
         }
 
         h1 {
             margin-top: 0;
             text-align: center;
-            color: #60a5fa;
+            color: var(--azul);
         }
 
         .descricao {
             text-align: center;
-            color: #9ca3af;
+            color: var(--secundario);
             line-height: 1.6;
         }
 
         .painel {
             margin: 25px 0;
             padding: 20px;
-            background: #080d19;
+            background: var(--painel-interno);
             border-radius: 12px;
         }
 
         .rotulo {
-            color: #9ca3af;
+            color: var(--secundario);
             font-size: 14px;
         }
 
         #pi {
-            margin: 15px 0;
+            min-height: 40px;
+            max-height: 40vh;
+            margin: 15px 0 0;
             color: #93c5fd;
-            font-family: monospace;
+            font-family: Consolas, monospace;
             font-size: 20px;
             line-height: 1.8;
+            overflow-y: auto;
             overflow-wrap: anywhere;
             word-break: break-all;
+            white-space: pre-wrap;
         }
 
         .estatisticas {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
 
         .estatistica {
+            min-width: 0;
             padding: 16px;
-            background: #202a40;
+            background: var(--cartao);
             border-radius: 10px;
         }
 
         .valor {
             display: block;
             margin-top: 8px;
-            color: #60a5fa;
+            color: var(--azul);
             font-size: 23px;
             font-weight: bold;
             overflow-wrap: anywhere;
         }
 
+        .status {
+            margin: 18px 0;
+            color: #fbbf24;
+            text-align: center;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .nota {
+            margin-top: 25px;
+            color: var(--secundario);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* Controles fixos, independentes do conteúdo */
+
+        .barra-controles {
+            position: fixed;
+            z-index: 1000;
+            right: 0;
+            bottom: 0;
+            left: 0;
+
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+
+            padding: 16px 24px;
+            background: var(--fundo);
+            border-top: 1px solid var(--borda);
+        }
+
         .botoes {
             display: flex;
-            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1000px;
             gap: 12px;
-            margin: 20px 0;
         }
 
         button {
             flex: 1;
-            min-width: 140px;
-            padding: 14px;
+            min-width: 0;
+            padding: 14px 10px;
             border: none;
             border-radius: 9px;
             color: white;
@@ -111,38 +175,23 @@
         }
 
         #iniciar {
-            background: #16a34a;
+            background: var(--verde);
         }
 
         #parar {
-            background: #dc2626;
+            background: var(--vermelho);
         }
 
         #reiniciar {
-            background: #475569;
-        }
-
-        .status {
-            margin-top: 15px;
-            color: #fbbf24;
-            text-align: center;
-            overflow-wrap: anywhere;
-        }
-
-        .nota {
-            margin-top: 25px;
-            color: #9ca3af;
-            font-size: 13px;
-            line-height: 1.7;
+            background: var(--cinza);
         }
 
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
+            .pagina {
+                padding: 12px 12px 115px;
             }
 
             .container {
-                margin: 10px auto;
                 padding: 16px;
             }
 
@@ -152,121 +201,111 @@
 
             #pi {
                 font-size: 16px;
+                max-height: 35vh;
+            }
+
+            .barra-controles {
+                padding: 10px;
+            }
+
+            .botoes {
+                gap: 7px;
+            }
+
+            button {
+                padding: 13px 5px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 
 <body>
-    <main class="container">
-        <h1>π — Gerador de Dígitos</h1>
+    <main class="pagina">
+        <div class="container">
+            <h1>π — Gerador de Dígitos</h1>
 
-        <p class="descricao">
-            Calcule os dígitos de Pi progressivamente.
-            Inicie, pare e retome quando quiser.
-        </p>
+            <p class="descricao">
+                Calcule os dígitos de Pi progressivamente.
+                Inicie, pare e retome quando quiser.
+            </p>
 
-        <section class="painel">
-            <div class="rotulo">Dígitos calculados de Pi</div>
-            <div id="pi">3.</div>
-        </section>
+            <section class="painel">
+                <div class="rotulo">Dígitos calculados de Pi</div>
+                <div id="pi">3.</div>
+            </section>
 
-        <section class="estatisticas">
-            <div class="estatistica">
-                <span class="rotulo">Casas decimais calculadas</span>
-                <span class="valor" id="contador">0</span>
+            <section class="estatisticas">
+                <div class="estatistica">
+                    <span class="rotulo">
+                        Casas decimais calculadas
+                    </span>
+                    <span class="valor" id="contador">0</span>
+                </div>
+
+                <div class="estatistica">
+                    <span class="rotulo">
+                        Último dígito encontrado
+                    </span>
+                    <span class="valor" id="ultimo">—</span>
+                </div>
+            </section>
+
+            <div class="status" id="status">
+                Verificando banco de dados...
             </div>
 
-            <div class="estatistica">
-                <span class="rotulo">Último dígito encontrado</span>
-                <span class="valor" id="ultimo">—</span>
-            </div>
-        </section>
+            <p class="nota">
+                O progresso é salvo automaticamente no banco de dados
+                local do navegador. Você pode fechar e abrir novamente
+                a página para recuperar os dígitos salvos.
 
-        <div class="botoes">
-            <button id="iniciar">▶ Iniciar / Retomar</button>
-            <button id="parar" disabled>■ Parar</button>
-            <button id="reiniciar">↺ Reiniciar</button>
+                O cálculo utiliza a fórmula de Machin com aritmética
+                inteira e precisão adicional. O desempenho depende
+                dos recursos do computador.
+            </p>
         </div>
-
-        <div class="status" id="status">
-            Pronto para iniciar.
-        </div>
-
-        <p class="nota">
-            O cálculo acontece no navegador. O progresso é mantido
-            ao pausar e retomar. Fechar ou recarregar a página apaga
-            o progresso desta versão. A velocidade depende do computador.
-            Nenhum computador dispõe de recursos infinitos.
-        </p>
     </main>
 
+    <footer class="barra-controles">
+        <div class="botoes">
+            <button id="iniciar" disabled>
+                ▶ Iniciar / Retomar
+            </button>
+
+            <button id="parar" disabled>
+                ■ Parar
+            </button>
+
+            <button id="reiniciar" disabled>
+                ↺ Reiniciar
+            </button>
+        </div>
+    </footer>
+
     <script>
-        /*
-         * GERADOR DE PI — ALGORITMO SPIGOT
-         *
-         * Gera um dígito por vez, sem calcular novamente os
-         * dígitos anteriores.
-         *
-         * BigInt mantém a aritmética inteira exata, evitando
-         * os erros de arredondamento de Number.
-         */
+        "use strict";
 
-        class GeradorPi {
-            constructor() {
-                this.q = 1n;
-                this.r = 0n;
-                this.t = 1n;
-                this.k = 1n;
-                this.n = 3n;
-                this.l = 3n;
-            }
+        // =====================================================
+        // CONFIGURAÇÕES
+        // =====================================================
 
-            proximoDigito() {
-                while (true) {
-                    // Verifica se o próximo dígito já é seguro.
-                    if (
-                        4n * this.q + this.r - this.t
-                        < this.n * this.t
-                    ) {
-                        const digito = this.n;
+        const NOME_BANCO = "BancoPi";
+        const VERSAO_BANCO = 1;
+        const NOME_ARMAZENAMENTO = "progresso";
 
-                        // Calcula o próximo estado usando os
-                        // valores antigos antes de substituí-los.
-                        const novoR =
-                            10n * (this.r - digito * this.t);
+        // Quantas casas novas calcular por etapa.
+        const TAMANHO_LOTE = 10;
 
-                        const novoN =
-                            (10n * (3n * this.q + this.r))
-                            / this.t - 10n * digito;
+        // Precisão extra para reduzir os erros de truncamento.
+        const DIGITOS_GUARDA = 30;
 
-                        this.q = 10n * this.q;
-                        this.r = novoR;
-                        this.n = novoN;
+        // Quantidade máxima de dígitos exibidos simultaneamente.
+        const LIMITE_EXIBICAO = 100000;
 
-                        return Number(digito);
-                    }
-
-                    // Refinamento do estado interno do algoritmo.
-                    const novoR =
-                        (2n * this.q + this.r) * this.l;
-
-                    const novoN =
-                        (
-                            this.q * (7n * this.k)
-                            + 2n
-                            + this.r * this.l
-                        ) / (this.t * this.l);
-
-                    this.q = this.q * this.k;
-                    this.t = this.t * this.l;
-                    this.l = this.l + 2n;
-                    this.k = this.k + 1n;
-                    this.r = novoR;
-                    this.n = novoN;
-                }
-            }
-        }
+        // =====================================================
+        // ELEMENTOS DA INTERFACE
+        // =====================================================
 
         const elementoPi = document.getElementById("pi");
         const elementoContador = document.getElementById("contador");
@@ -277,147 +316,504 @@
         const botaoParar = document.getElementById("parar");
         const botaoReiniciar = document.getElementById("reiniciar");
 
-        let gerador;
+        // =====================================================
+        // ESTADO DO PROGRAMA
+        // =====================================================
+
+        let banco = null;
         let executando = false;
+        let ocupado = false;
         let casas = 0;
-        let digitosRecentes = "";
+        let digitos = "";
         let temporizador = null;
+        let identificadorExecucao = 0;
+        let erroBanco = null;
 
-        // Limita apenas a quantidade de texto exibida.
-        // O cálculo continua mesmo quando esse limite é atingido.
-        const LIMITE_EXIBICAO = 100000;
+        // =====================================================
+        // BANCO DE DADOS INDEXEDDB
+        // =====================================================
 
-        // Quantos dígitos calcular antes de atualizar a interface.
-        const TAMANHO_LOTE = 100;
+        function abrirBanco() {
+            return new Promise((resolve, reject) => {
+                if (!("indexedDB" in window)) {
+                    reject(
+                        new Error(
+                            "Este navegador não suporta IndexedDB."
+                        )
+                    );
+                    return;
+                }
+
+                const pedido = indexedDB.open(
+                    NOME_BANCO,
+                    VERSAO_BANCO
+                );
+
+                pedido.onupgradeneeded = () => {
+                    const db = pedido.result;
+
+                    if (!db.objectStoreNames.contains(
+                        NOME_ARMAZENAMENTO
+                    )) {
+                        db.createObjectStore(
+                            NOME_ARMAZENAMENTO,
+                            { keyPath: "id" }
+                        );
+                    }
+                };
+
+                pedido.onsuccess = () => {
+                    resolve(pedido.result);
+                };
+
+                pedido.onerror = () => {
+                    reject(
+                        pedido.error ||
+                        new Error("Não foi possível abrir o banco.")
+                    );
+                };
+
+                pedido.onblocked = () => {
+                    console.warn(
+                        "A abertura do banco está bloqueada."
+                    );
+                };
+            });
+        }
+
+        function carregarProgresso() {
+            return new Promise((resolve, reject) => {
+                const transacao = banco.transaction(
+                    NOME_ARMAZENAMENTO,
+                    "readonly"
+                );
+
+                const armazenamento = transacao.objectStore(
+                    NOME_ARMAZENAMENTO
+                );
+
+                const pedido = armazenamento.get("principal");
+
+                pedido.onsuccess = () => {
+                    resolve(pedido.result || null);
+                };
+
+                pedido.onerror = () => {
+                    reject(
+                        pedido.error ||
+                        new Error("Falha ao ler o progresso.")
+                    );
+                };
+            });
+        }
+
+        function salvarProgresso() {
+            return new Promise((resolve, reject) => {
+                if (!banco) {
+                    reject(new Error("Banco de dados indisponível."));
+                    return;
+                }
+
+                const transacao = banco.transaction(
+                    NOME_ARMAZENAMENTO,
+                    "readwrite"
+                );
+
+                const armazenamento = transacao.objectStore(
+                    NOME_ARMAZENAMENTO
+                );
+
+                armazenamento.put({
+                    id: "principal",
+                    casas: casas,
+                    digitos: digitos,
+                    atualizadoEm: new Date().toISOString()
+                });
+
+                transacao.oncomplete = () => resolve();
+
+                transacao.onerror = () => {
+                    reject(
+                        transacao.error ||
+                        new Error("Falha ao salvar o progresso.")
+                    );
+                };
+
+                transacao.onabort = () => {
+                    reject(
+                        transacao.error ||
+                        new Error("O salvamento foi cancelado.")
+                    );
+                };
+            });
+        }
+
+        // =====================================================
+        // CÁLCULO DE PI
+        // =====================================================
+
+        /*
+         * Fórmula de Machin:
+         *
+         * pi = 16 * atan(1/5) - 4 * atan(1/239)
+         *
+         * atan(1/q) =
+         * 1/q - 1/(3*q^3) + 1/(5*q^5) - ...
+         *
+         * Todo o cálculo usa BigInt para não depender da
+         * precisão de ponto flutuante do JavaScript.
+         */
+
+        function arctanInverso(inverso, escala) {
+            const q = BigInt(inverso);
+            const qQuadrado = q * q;
+
+            let potencia = escala / q;
+            let denominador = 1n;
+            let soma = 0n;
+            let sinal = 1n;
+
+            while (potencia > 0n) {
+                const termo = potencia / denominador;
+
+                if (termo === 0n) {
+                    break;
+                }
+
+                soma += sinal * termo;
+
+                // Próxima potência: q^-(2k+3).
+                potencia /= qQuadrado;
+                denominador += 2n;
+                sinal = -sinal;
+            }
+
+            return soma;
+        }
+
+        function calcularPi(precisaoDecimal) {
+            /*
+             * A precisão adicional ajuda a proteger os dígitos
+             * solicitados contra os truncamentos das divisões.
+             */
+
+            const precisaoInterna =
+                precisaoDecimal + DIGITOS_GUARDA;
+
+            const escala =
+                10n ** BigInt(precisaoInterna);
+
+            const atan5 = arctanInverso(5, escala);
+            const atan239 = arctanInverso(239, escala);
+
+            const resultado =
+                16n * atan5 - 4n * atan239;
+
+            const texto = resultado
+                .toString()
+                .padStart(precisaoInterna + 1, "0");
+
+            const parteInteira = texto.slice(
+                0,
+                texto.length - precisaoInterna
+            );
+
+            const parteDecimal = texto.slice(
+                texto.length - precisaoInterna,
+                texto.length - precisaoInterna +
+                    precisaoDecimal
+            );
+
+            return parteInteira + "." + parteDecimal;
+        }
+
+        function validarResultado(resultado) {
+            /*
+             * Referência independente dos primeiros dígitos
+             * conhecidos de Pi.
+             */
+
+            const referencia =
+                "3.14159265358979323846264338327950288419716939937510";
+
+            const trecho = resultado.slice(
+                0,
+                Math.min(resultado.length, referencia.length)
+            );
+
+            return trecho === referencia.slice(0, trecho.length);
+        }
+
+        // =====================================================
+        // ATUALIZAÇÃO DA INTERFACE
+        // =====================================================
 
         function atualizarTela() {
-            elementoPi.textContent = "3." + digitosRecentes;
+            const visiveis = digitos.slice(-LIMITE_EXIBICAO);
+
+            elementoPi.textContent = "3." + visiveis;
 
             elementoContador.textContent =
                 casas.toLocaleString("pt-BR");
 
             elementoUltimo.textContent =
-                digitosRecentes.length > 0
-                    ? digitosRecentes[digitosRecentes.length - 1]
+                digitos.length > 0
+                    ? digitos[digitos.length - 1]
                     : "—";
         }
 
-        function processarLote() {
+        function atualizarBotoes() {
+            botaoIniciar.disabled =
+                executando || ocupado || !banco || !!erroBanco;
+
+            botaoParar.disabled = !executando;
+
+            botaoReiniciar.disabled =
+                ocupado || !banco || !!erroBanco;
+        }
+
+        // =====================================================
+        // GERAÇÃO PROGRESSIVA
+        // =====================================================
+
+        async function processarLote(idExecucao) {
             temporizador = null;
 
-            if (!executando) {
+            if (
+                !executando ||
+                idExecucao !== identificadorExecucao
+            ) {
                 return;
             }
 
+            ocupado = true;
+            atualizarBotoes();
+
             try {
-                for (let i = 0; i < TAMANHO_LOTE; i++) {
-                    if (!executando) {
-                        break;
-                    }
+                /*
+                 * Calcula um resultado com precisão maior do que
+                 * a quantidade atual de dígitos.
+                 *
+                 * O prefixo já salvo é comparado antes de
+                 * aceitar novos dígitos.
+                 */
 
-                    const digito = gerador.proximoDigito();
+                const quantidadeDesejada =
+                    casas + TAMANHO_LOTE;
 
-                    if (
-                        !Number.isInteger(digito) ||
-                        digito < 0 ||
-                        digito > 9
-                    ) {
-                        throw new Error(
-                            "O algoritmo produziu um dígito inválido."
-                        );
-                    }
+                const resultado = calcularPi(
+                    quantidadeDesejada + DIGITOS_GUARDA
+                );
 
-                    digitosRecentes += String(digito);
-                    casas++;
-
-                    if (
-                        digitosRecentes.length > LIMITE_EXIBICAO
-                    ) {
-                        digitosRecentes =
-                            digitosRecentes.slice(-LIMITE_EXIBICAO);
-                    }
+                if (!validarResultado(resultado)) {
+                    throw new Error(
+                        "O resultado não passou na validação."
+                    );
                 }
+
+                if (!resultado.startsWith("3.")) {
+                    throw new Error(
+                        "A parte inteira de Pi está incorreta."
+                    );
+                }
+
+                const novosDigitos = resultado.slice(2);
+
+                if (
+                    novosDigitos.slice(0, casas) !==
+                    digitos.slice(0, casas)
+                ) {
+                    throw new Error(
+                        "Os novos dígitos não correspondem ao progresso salvo."
+                    );
+                }
+
+                const novos = novosDigitos.slice(
+                    casas,
+                    quantidadeDesejada
+                );
+
+                if (novos.length === 0) {
+                    throw new Error(
+                        "Nenhum dígito novo foi produzido."
+                    );
+                }
+
+                digitos += novos;
+                casas = digitos.length;
 
                 atualizarTela();
 
-                if (executando) {
+                // O progresso é salvo antes de agendar o próximo lote.
+                await salvarProgresso();
+
+                if (
+                    executando &&
+                    idExecucao === identificadorExecucao
+                ) {
                     elementoStatus.textContent =
-                        "Calculando... " +
+                        "Calculando e salvando... " +
                         casas.toLocaleString("pt-BR") +
                         " casas decimais.";
-
-                    temporizador = setTimeout(processarLote, 0);
                 }
             } catch (erro) {
-                parar();
+                executando = false;
+                identificadorExecucao++;
 
                 elementoStatus.textContent =
-                    "Erro no cálculo: " + erro.message;
+                    "Erro: " + erro.message;
 
                 console.error(erro);
+            } finally {
+                ocupado = false;
+                atualizarBotoes();
+            }
+
+            if (
+                executando &&
+                idExecucao === identificadorExecucao
+            ) {
+                temporizador = setTimeout(
+                    () => processarLote(idExecucao),
+                    0
+                );
             }
         }
 
+        // =====================================================
+        // BOTÕES
+        // =====================================================
+
         function iniciar() {
-            if (executando) {
+            if (
+                executando ||
+                ocupado ||
+                !banco ||
+                erroBanco
+            ) {
                 return;
             }
 
             executando = true;
+            identificadorExecucao++;
 
-            botaoIniciar.disabled = true;
-            botaoParar.disabled = false;
+            elementoStatus.textContent =
+                "Iniciando cálculo...";
 
-            elementoStatus.textContent = "Calculando...";
+            atualizarBotoes();
 
-            processarLote();
+            processarLote(identificadorExecucao);
         }
 
         function parar() {
             executando = false;
+            identificadorExecucao++;
 
             if (temporizador !== null) {
                 clearTimeout(temporizador);
                 temporizador = null;
             }
 
-            botaoIniciar.disabled = false;
-            botaoParar.disabled = true;
-
             elementoStatus.textContent =
-                "Cálculo pausado. Você pode retomar.";
+                "Cálculo pausado. Progresso salvo no banco.";
+
+            atualizarBotoes();
         }
 
-        function reiniciar() {
+        async function reiniciar() {
+            if (ocupado || !banco) {
+                return;
+            }
+
             parar();
 
-            gerador = new GeradorPi();
-            casas = 0;
-            digitosRecentes = "";
+            ocupado = true;
+            atualizarBotoes();
 
-            atualizarTela();
+            try {
+                casas = 0;
+                digitos = "";
 
-            elementoStatus.textContent =
-                "Reiniciado. Pronto para começar.";
+                await salvarProgresso();
+
+                atualizarTela();
+
+                elementoStatus.textContent =
+                    "Progresso apagado. Pronto para iniciar novamente.";
+            } catch (erro) {
+                elementoStatus.textContent =
+                    "Erro ao reiniciar: " + erro.message;
+
+                console.error(erro);
+            } finally {
+                ocupado = false;
+                atualizarBotoes();
+            }
         }
 
         botaoIniciar.addEventListener("click", iniciar);
         botaoParar.addEventListener("click", parar);
         botaoReiniciar.addEventListener("click", reiniciar);
 
-        // Inicializa o gerador e consome o 3 inicial.
-        // O restante produzido será exibido após a vírgula.
-        gerador = new GeradorPi();
+        // =====================================================
+        // INICIALIZAÇÃO
+        // =====================================================
 
-        const parteInteira = gerador.proximoDigito();
+        async function inicializar() {
+            try {
+                banco = await abrirBanco();
 
-        if (parteInteira !== 3) {
-            elementoStatus.textContent =
-                "Erro ao inicializar o gerador.";
-            botaoIniciar.disabled = true;
+                const salvo = await carregarProgresso();
+
+                if (salvo) {
+                    if (
+                        typeof salvo.digitos !== "string" ||
+                        !Number.isSafeInteger(salvo.casas) ||
+                        salvo.casas < 0 ||
+                        salvo.digitos.length !== salvo.casas ||
+                        !/^[0-9]*$/.test(salvo.digitos)
+                    ) {
+                        throw new Error(
+                            "Os dados salvos estão inconsistentes."
+                        );
+                    }
+
+                    digitos = salvo.digitos;
+                    casas = salvo.casas;
+
+                    // Confere o prefixo conhecido antes de continuar.
+                    if (!validarResultado("3." + digitos)) {
+                        throw new Error(
+                            "O progresso salvo não passou na validação."
+                        );
+                    }
+
+                    elementoStatus.textContent =
+                        "Progresso recuperado: " +
+                        casas.toLocaleString("pt-BR") +
+                        " casas decimais.";
+                } else {
+                    elementoStatus.textContent =
+                        "Banco pronto. Clique em Iniciar.";
+                }
+
+                atualizarTela();
+                atualizarBotoes();
+
+            } catch (erro) {
+                erroBanco = erro;
+
+                elementoStatus.textContent =
+                    "Não foi possível abrir ou recuperar o banco: " +
+                    erro.message;
+
+                console.error(erro);
+                atualizarBotoes();
+            }
         }
 
         atualizarTela();
+        inicializar();
     </script>
 </body>
 </html>
