@@ -1,0 +1,424 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>π — Gerador de Dígitos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 24px;
+            background: #0b1020;
+            color: #e5e7eb;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 28px;
+            background: #151c2e;
+            border: 1px solid #2b354d;
+            border-radius: 18px;
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            color: #60a5fa;
+        }
+
+        .descricao {
+            text-align: center;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+
+        .painel {
+            margin: 25px 0;
+            padding: 20px;
+            background: #080d19;
+            border-radius: 12px;
+        }
+
+        .rotulo {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        #pi {
+            margin: 15px 0;
+            color: #93c5fd;
+            font-family: monospace;
+            font-size: 20px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+            word-break: break-all;
+        }
+
+        .estatisticas {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .estatistica {
+            padding: 16px;
+            background: #202a40;
+            border-radius: 10px;
+        }
+
+        .valor {
+            display: block;
+            margin-top: 8px;
+            color: #60a5fa;
+            font-size: 23px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .botoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        button {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px;
+            border: none;
+            border-radius: 9px;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        #iniciar {
+            background: #16a34a;
+        }
+
+        #parar {
+            background: #dc2626;
+        }
+
+        #reiniciar {
+            background: #475569;
+        }
+
+        .status {
+            margin-top: 15px;
+            color: #fbbf24;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .nota {
+            margin-top: 25px;
+            color: #9ca3af;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                margin: 10px auto;
+                padding: 16px;
+            }
+
+            .estatisticas {
+                grid-template-columns: 1fr;
+            }
+
+            #pi {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <h1>π — Gerador de Dígitos</h1>
+
+        <p class="descricao">
+            Calcule os dígitos de Pi progressivamente.
+            Inicie, pare e retome quando quiser.
+        </p>
+
+        <section class="painel">
+            <div class="rotulo">Dígitos calculados de Pi</div>
+            <div id="pi">3.</div>
+        </section>
+
+        <section class="estatisticas">
+            <div class="estatistica">
+                <span class="rotulo">Casas decimais calculadas</span>
+                <span class="valor" id="contador">0</span>
+            </div>
+
+            <div class="estatistica">
+                <span class="rotulo">Último dígito encontrado</span>
+                <span class="valor" id="ultimo">—</span>
+            </div>
+        </section>
+
+        <div class="botoes">
+            <button id="iniciar">▶ Iniciar / Retomar</button>
+            <button id="parar" disabled>■ Parar</button>
+            <button id="reiniciar">↺ Reiniciar</button>
+        </div>
+
+        <div class="status" id="status">
+            Pronto para iniciar.
+        </div>
+
+        <p class="nota">
+            O cálculo acontece no navegador. O progresso é mantido
+            ao pausar e retomar. Fechar ou recarregar a página apaga
+            o progresso desta versão. A velocidade depende do computador.
+            Nenhum computador dispõe de recursos infinitos.
+        </p>
+    </main>
+
+    <script>
+        /*
+         * GERADOR DE PI — ALGORITMO SPIGOT
+         *
+         * Gera um dígito por vez, sem calcular novamente os
+         * dígitos anteriores.
+         *
+         * BigInt mantém a aritmética inteira exata, evitando
+         * os erros de arredondamento de Number.
+         */
+
+        class GeradorPi {
+            constructor() {
+                this.q = 1n;
+                this.r = 0n;
+                this.t = 1n;
+                this.k = 1n;
+                this.n = 3n;
+                this.l = 3n;
+            }
+
+            proximoDigito() {
+                while (true) {
+                    // Verifica se o próximo dígito já é seguro.
+                    if (
+                        4n * this.q + this.r - this.t
+                        < this.n * this.t
+                    ) {
+                        const digito = this.n;
+
+                        // Calcula o próximo estado usando os
+                        // valores antigos antes de substituí-los.
+                        const novoR =
+                            10n * (this.r - digito * this.t);
+
+                        const novoN =
+                            (10n * (3n * this.q + this.r))
+                            / this.t - 10n * digito;
+
+                        this.q = 10n * this.q;
+                        this.r = novoR;
+                        this.n = novoN;
+
+                        return Number(digito);
+                    }
+
+                    // Refinamento do estado interno do algoritmo.
+                    const novoR =
+                        (2n * this.q + this.r) * this.l;
+
+                    const novoN =
+                        (
+                            this.q * (7n * this.k)
+                            + 2n
+                            + this.r * this.l
+                        ) / (this.t * this.l);
+
+                    this.q = this.q * this.k;
+                    this.t = this.t * this.l;
+                    this.l = this.l + 2n;
+                    this.k = this.k + 1n;
+                    this.r = novoR;
+                    this.n = novoN;
+                }
+            }
+        }
+
+        const elementoPi = document.getElementById("pi");
+        const elementoContador = document.getElementById("contador");
+        const elementoUltimo = document.getElementById("ultimo");
+        const elementoStatus = document.getElementById("status");
+
+        const botaoIniciar = document.getElementById("iniciar");
+        const botaoParar = document.getElementById("parar");
+        const botaoReiniciar = document.getElementById("reiniciar");
+
+        let gerador;
+        let executando = false;
+        let casas = 0;
+        let digitosRecentes = "";
+        let temporizador = null;
+
+        // Limita apenas a quantidade de texto exibida.
+        // O cálculo continua mesmo quando esse limite é atingido.
+        const LIMITE_EXIBICAO = 100000;
+
+        // Quantos dígitos calcular antes de atualizar a interface.
+        const TAMANHO_LOTE = 100;
+
+        function atualizarTela() {
+            elementoPi.textContent = "3." + digitosRecentes;
+
+            elementoContador.textContent =
+                casas.toLocaleString("pt-BR");
+
+            elementoUltimo.textContent =
+                digitosRecentes.length > 0
+                    ? digitosRecentes[digitosRecentes.length - 1]
+                    : "—";
+        }
+
+        function processarLote() {
+            temporizador = null;
+
+            if (!executando) {
+                return;
+            }
+
+            try {
+                for (let i = 0; i < TAMANHO_LOTE; i++) {
+                    if (!executando) {
+                        break;
+                    }
+
+                    const digito = gerador.proximoDigito();
+
+                    if (
+                        !Number.isInteger(digito) ||
+                        digito < 0 ||
+                        digito > 9
+                    ) {
+                        throw new Error(
+                            "O algoritmo produziu um dígito inválido."
+                        );
+                    }
+
+                    digitosRecentes += String(digito);
+                    casas++;
+
+                    if (
+                        digitosRecentes.length > LIMITE_EXIBICAO
+                    ) {
+                        digitosRecentes =
+                            digitosRecentes.slice(-LIMITE_EXIBICAO);
+                    }
+                }
+
+                atualizarTela();
+
+                if (executando) {
+                    elementoStatus.textContent =
+                        "Calculando... " +
+                        casas.toLocaleString("pt-BR") +
+                        " casas decimais.";
+
+                    temporizador = setTimeout(processarLote, 0);
+                }
+            } catch (erro) {
+                parar();
+
+                elementoStatus.textContent =
+                    "Erro no cálculo: " + erro.message;
+
+                console.error(erro);
+            }
+        }
+
+        function iniciar() {
+            if (executando) {
+                return;
+            }
+
+            executando = true;
+
+            botaoIniciar.disabled = true;
+            botaoParar.disabled = false;
+
+            elementoStatus.textContent = "Calculando...";
+
+            processarLote();
+        }
+
+        function parar() {
+            executando = false;
+
+            if (temporizador !== null) {
+                clearTimeout(temporizador);
+                temporizador = null;
+            }
+
+            botaoIniciar.disabled = false;
+            botaoParar.disabled = true;
+
+            elementoStatus.textContent =
+                "Cálculo pausado. Você pode retomar.";
+        }
+
+        function reiniciar() {
+            parar();
+
+            gerador = new GeradorPi();
+            casas = 0;
+            digitosRecentes = "";
+
+            atualizarTela();
+
+            elementoStatus.textContent =
+                "Reiniciado. Pronto para começar.";
+        }
+
+        botaoIniciar.addEventListener("click", iniciar);
+        botaoParar.addEventListener("click", parar);
+        botaoReiniciar.addEventListener("click", reiniciar);
+
+        // Inicializa o gerador e consome o 3 inicial.
+        // O restante produzido será exibido após a vírgula.
+        gerador = new GeradorPi();
+
+        const parteInteira = gerador.proximoDigito();
+
+        if (parteInteira !== 3) {
+            elementoStatus.textContent =
+                "Erro ao inicializar o gerador.";
+            botaoIniciar.disabled = true;
+        }
+
+        atualizarTela();
+    </script>
+</body>
+</html>
+```
